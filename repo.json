@@ -1,5 +1,11 @@
 {
-  "SchemaVersion": 2,
+  "SchemaVersion": 3,
   "Repository": "GTFO-Mod-Build-and-Verification-Tools",
-  "Modules": []
+  "Modules": [],
+  "InputRoots": [
+    "src",
+    "tests",
+    "tools"
+  ],
+  "TestPlanPath": "tests/recipes.json"
 }

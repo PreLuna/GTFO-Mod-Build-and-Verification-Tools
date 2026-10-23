@@ -5,6 +5,7 @@ param(
  [string]$DependencyRoot='', [string]$CecilPath=''
 )
 $ErrorActionPreference='Stop'
+. (Join-Path $PSScriptRoot 'Repository-Paths.ps1')
 $repo=[IO.Path]::GetFullPath($RepositoryRoot)
 $spec=Get-Content -LiteralPath (Join-Path $repo 'repo.json') -Raw | ConvertFrom-Json
 $toolkit=Split-Path $PSScriptRoot -Parent
@@ -33,9 +34,10 @@ if($migrationNeeded){
 $outputs=@{};$artifacts=@()
 foreach($module in $spec.Modules){
  if($module.Kind -eq 'data'){
-   $target=Join-Path $out 'package/BepInEx/plugins/PreLuna.WeaponDataCustom/GameData'
+   $dataRoot=Resolve-RepositoryPath $repo $module.DataRoot
+   $target=Resolve-RepositoryPath (Join-Path $out 'package') $module.InstallPath
    New-Item -ItemType Directory -Path $target -Force | Out-Null
-   Copy-Item -Path (Join-Path $repo 'data/*') -Destination $target -Recurse
+   foreach($item in Get-ChildItem -LiteralPath $dataRoot -Force){Copy-Item -LiteralPath $item.FullName -Destination $target -Recurse}
    continue
  }
  $destination=Join-Path $out ('package/BepInEx/plugins/'+$module.Assembly)
@@ -43,10 +45,12 @@ foreach($module in $spec.Modules){
  New-Item -ItemType Directory -Path $destination -Force | Out-Null
  $dll=Join-Path $destination ($module.Assembly+'.dll')
  if($module.Kind -eq 'frozen-migrated'){
-   $inputAssembly=Join-Path $repo $module.Baseline
+   $inputAssembly=Resolve-RepositoryPath $repo $module.Baseline
    if((Get-FileHash -LiteralPath $inputAssembly).Hash -cne $module.BaselineSHA256){throw ('Frozen baseline changed: '+$module.Id)}
  }else{
-   $sources=@(Get-ChildItem -LiteralPath (Join-Path $repo ('src/'+$module.Id)) -Filter '*.cs' -Recurse -File | ForEach-Object FullName)
+   $sourceRoot=Resolve-RepositoryPath $repo $module.SourceRoot
+   $sources=@(Get-ChildItem -LiteralPath $sourceRoot -Filter '*.cs' -Recurse -File -Force | ForEach-Object FullName)
+   if(!$sources.Count){throw ('No registered source files: '+$module.Id)}
    $references=if($module.Kind -eq 'contract'){@($system)}else{@($baseRefs)}
    foreach($required in $module.CompileDependencies){if(!$outputs.ContainsKey($required)){throw ('Missing compile dependency '+$required)};$references+=$outputs[$required]}
    foreach($external in $module.ExternalReferences){
@@ -54,9 +58,9 @@ foreach($module in $spec.Modules){
       if(!$matches.Count){throw ('Missing pinned dependency: '+$external.Name)}
       $references+=$matches[0].FullName
    }
-   $resources=@($module.Resources | Where-Object {$_} | ForEach-Object {(Join-Path $repo $_.Path)+'|'+$_.Name})
+   $resources=@($module.Resources | Where-Object {$_} | ForEach-Object {(Resolve-RepositoryPath $repo $_.Path)+'|'+$_.Name})
    $inputAssembly=if($module.Kind -eq 'managed-migrated'){Join-Path $support ($module.Assembly+'.dll')}else{$dll}
-   & $compile -Sources $sources -References $references -Resources $resources -Output $inputAssembly -NullableEnabled:([bool]$module.NullableEnabled) -WarningsAsErrors:([bool]$module.WarningsAsErrors) | Out-Null
+   & $compile -Sources $sources -References $references -Resources $resources -Output $inputAssembly -NullableEnabled:([bool]$module.NullableEnabled) -WarningsAsErrors:([bool]$module.WarningsAsErrors) | Tee-Object -FilePath (Join-Path $support ($module.Id+'-compile.log')) | Out-Null
  }
  if($module.Kind -in @('managed-migrated','frozen-migrated')){
    & dotnet (Join-Path $support 'BrandTransform.dll') $inputAssembly $dll (Join-Path $support 'Migration.helper.dll') (Join-Path $GameRoot 'BepInEx') $RuntimeRoot $module.LegacyGuid $module.Guid (Join-Path $support ($module.Id+'.identity.json')) | Out-Null

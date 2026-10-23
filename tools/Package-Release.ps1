@@ -1,16 +1,18 @@
 param(
  [Parameter(Mandatory=$true)][string]$RepositoryRoot,
  [Parameter(Mandatory=$true)][string]$DestinationRoot,
- [Parameter(Mandatory=$true)][string]$Version
+ [Parameter(Mandatory=$true)][string]$Version,
+ [switch]$Preview
 )
 $ErrorActionPreference='Stop'
+. (Join-Path $PSScriptRoot 'Repository-Paths.ps1')
 $repo=[IO.Path]::GetFullPath($RepositoryRoot)
 $destination=[IO.Path]::GetFullPath($DestinationRoot)
 if($destination -eq $repo -or $destination.StartsWith($repo+'\',[StringComparison]::OrdinalIgnoreCase)){throw 'Release output must be outside the source repository.'}
 if($Version -notmatch '^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$'){throw 'Invalid release label.'}
 & (Join-Path $PSScriptRoot 'Check-Commit.ps1') -RepositoryRoot $repo | Out-Null
 $status=@(& git -C $repo status --porcelain)
-if($LASTEXITCODE -ne 0 -or $status.Count){throw 'Commit the verified source before creating a release package.'}
+if($LASTEXITCODE -ne 0 -or ($status.Count -and !$Preview)){throw 'Commit the verified source before creating a release package; use -Preview for explicitly uncommitted local verification.'}
 $commit=& git -C $repo rev-parse HEAD
 if($LASTEXITCODE -ne 0){throw 'A source commit is required.'}
 $build=Get-Content -LiteralPath (Join-Path $repo 'out/build-manifest.json') -Raw | ConvertFrom-Json
@@ -25,8 +27,9 @@ foreach($artifact in $build.Artifacts){
  $expected[$relative]=$artifact.SHA256
 }
 foreach($module in $spec.Modules | Where-Object Kind -eq 'data'){
- foreach($file in Get-ChildItem -LiteralPath (Join-Path $repo 'data') -Recurse -File -Force){
-  $relative='BepInEx/plugins/PreLuna.WeaponDataCustom/GameData/'+[IO.Path]::GetRelativePath((Join-Path $repo 'data'),$file.FullName).Replace('\','/')
+ $dataRoot=Resolve-RepositoryPath $repo $module.DataRoot
+ foreach($file in Get-ChildItem -LiteralPath $dataRoot -Recurse -File -Force){
+  $relative=$module.InstallPath.TrimEnd('/')+'/'+[IO.Path]::GetRelativePath($dataRoot,$file.FullName).Replace('\','/')
   $expected[$relative]=(Get-FileHash -LiteralPath $file.FullName).Hash
  }
 }
@@ -45,9 +48,9 @@ try{
  Copy-Item -LiteralPath (Join-Path $payload 'BepInEx') -Destination $stage -Recurse
  Copy-Item -LiteralPath (Join-Path $repo 'README.md') -Destination (Join-Path $stage 'INSTALL.md')
  [IO.Compression.ZipFile]::CreateFromDirectory($stage,$zip,[IO.Compression.CompressionLevel]::Optimal,$false)
- $manifest=[ordered]@{Repository=$spec.Repository;Version=$Version;SourceCommit=$commit;SourceLockSHA256=$build.SourceLockSHA256;ToolchainSourceLockSHA256=$build.ToolchainSourceLockSHA256;Zip=[IO.Path]::GetFileName($zip);SHA256=(Get-FileHash -LiteralPath $zip).Hash;Files=$expected;GameplayTested=$false}
+ $manifest=[ordered]@{Repository=$spec.Repository;Version=$Version;Status=$(if($Preview){'LocalPreview-NotCommitted'}else{'ReleaseCandidate'});ReleaseReady=(!$Preview);SourceCommit=$(if($Preview){$null}else{$commit});BaseCommit=$commit;WorkingTreeModified=($status.Count -gt 0);SourceLockSHA256=$build.SourceLockSHA256;ToolchainSourceLockSHA256=$build.ToolchainSourceLockSHA256;Zip=[IO.Path]::GetFileName($zip);SHA256=(Get-FileHash -LiteralPath $zip).Hash;Files=$expected;GameplayTested=$false}
  $manifest|ConvertTo-Json -Depth 5|Set-Content -LiteralPath ($zip+'.manifest.json') -Encoding utf8
- $manifest|Select-Object Repository,Version,SourceCommit,SHA256
+ [pscustomobject]$manifest|Select-Object Repository,Version,SourceCommit,ReleaseReady,SHA256
 }finally{
  $resolved=[IO.Path]::GetFullPath($stage)
  if(!$resolved.StartsWith($repo+'\out\release-stage-',[StringComparison]::OrdinalIgnoreCase)){throw 'Unsafe staging cleanup path.'}

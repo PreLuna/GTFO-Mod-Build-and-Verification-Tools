@@ -9,9 +9,6 @@
 .vscode/
 .idea/
 *.dll
-!baseline/
-!baseline/**/
-!baseline/**/*.dll
 *.pdb
 *.log
 *.zip
