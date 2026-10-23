@@ -1,0 +1,111 @@
+{
+  "SchemaVersion": 2,
+  "Repository": "GTFO-Mod-Build-and-Verification-Tools",
+  "Files": [
+    {
+      "Path": ".gitattributes",
+      "SHA256": "705FD4D6451A31D36B3DF7DE96F83F30AC976C9B4A6D1E51671D8E2F33E2D0DA",
+      "Bytes": 8
+    },
+    {
+      "Path": ".gitignore",
+      "SHA256": "9E6206F653FF3BC2FD319789B5CF5A21B6316588A00BD2C24540A344A9EAE8A0",
+      "Bytes": 228
+    },
+    {
+      "Path": "DEVELOPMENT.md",
+      "SHA256": "6BBAD8E9E31327C787F750672B814643C46A54218F17D1234D0188487DBE1773",
+      "Bytes": 2288
+    },
+    {
+      "Path": "NOTICE.md",
+      "SHA256": "DA8F387984A033A8DF23A99B2392CAB72A0A06443CB4B872DCDB84CB1BE493D1",
+      "Bytes": 277
+    },
+    {
+      "Path": "README.md",
+      "SHA256": "9F046BB482B8672A339A27C46FB287173101E736C356B59112A5805B7C53D5FD",
+      "Bytes": 276
+    },
+    {
+      "Path": "repo.json",
+      "SHA256": "856C006C0F200E23ECEE91F5EB325DE997144E21C5D14AAF198E4A43F33F7172",
+      "Bytes": 99
+    },
+    {
+      "Path": "src/BrandTransform.cs",
+      "SHA256": "B736E8D5F3DC1B2F45F1920D8403755CEDE7EA747DBE8737BD532418FA94AE4E",
+      "Bytes": 12538
+    },
+    {
+      "Path": "src/ModuleMigration.cs",
+      "SHA256": "61DB1B69521C3D608CE3B18E9B518B1A4445B0D446880C1101872128CD051A03",
+      "Bytes": 8338
+    },
+    {
+      "Path": "Test.ps1",
+      "SHA256": "C27930B6A94B9A7308CFE49736FD4406FC19CBBB27E38FFDB47B5B6AF4BAD2AB",
+      "Bytes": 165
+    },
+    {
+      "Path": "tests/Compatibility/CombatPolicy.cs",
+      "SHA256": "BEFE8C7B4EEB43529ADF3F5D9944EC021749021424EEB37A5ABA2270D1E134B1",
+      "Bytes": 9946
+    },
+    {
+      "Path": "tests/Fixtures/BoosterSelection.cs",
+      "SHA256": "8F1FB081AD3EB12308B07983666F4878C2EFB2B412C201E9FD38D4676AD9979E",
+      "Bytes": 8809
+    },
+    {
+      "Path": "tests/MigrationTests.cs",
+      "SHA256": "57ACE8C9B13DCA29267B1F98098AC77F49538B700E565A449006E33E48E1851B",
+      "Bytes": 7344
+    },
+    {
+      "Path": "tests/recipes.json",
+      "SHA256": "89EABD9CB4C2AB86C8A561B6BBBABE777AB705253B2F1C0CAC65868F1E88630B",
+      "Bytes": 173
+    },
+    {
+      "Path": "tools/Build-Repository.ps1",
+      "SHA256": "784A4EF76B876B81E525F42D2BABC100D7BCC72F1E4F374986522390A68A2F2A",
+      "Bytes": 5984
+    },
+    {
+      "Path": "tools/Check-Commit.ps1",
+      "SHA256": "7DB43DD7A39FDD11912FD68A64E5501638C47DDAB6BF4617CF62AD43AF6AC364",
+      "Bytes": 2630
+    },
+    {
+      "Path": "tools/Compile.ps1",
+      "SHA256": "1755387B066B087312C02EDF1959426E99C60D2DBBCECB660475C3BE0EB576ED",
+      "Bytes": 2445
+    },
+    {
+      "Path": "tools/Enable-Hooks.ps1",
+      "SHA256": "5144786A8A18C09B930FAA1B53F4BBF107BA3CC36099ADA95E7D15B015108115",
+      "Bytes": 1665
+    },
+    {
+      "Path": "tools/Package-Release.ps1",
+      "SHA256": "A102E012C1FB547859823173C0C2E55DBC0365EEFB6D63A6CCC8031E03E71D3A",
+      "Bytes": 3852
+    },
+    {
+      "Path": "tools/Test-Recipes.ps1",
+      "SHA256": "65A5A13940F2F4DCAD138EF2B0E724FB476C437027E19CB695240DEFB71A54D4",
+      "Bytes": 2140
+    },
+    {
+      "Path": "tools/Update-Lock.ps1",
+      "SHA256": "A7063E9C67095B8DC62E1ABA032D1D6CC4AC1EE213ECFD19B4DFDDF68804CF9B",
+      "Bytes": 896
+    },
+    {
+      "Path": "tools/Verify-Repository.ps1",
+      "SHA256": "1B333F52B08731FBCF1B745EE2482757514DDD8FE3A7ACE78F520F6F400327B4",
+      "Bytes": 3848
+    }
+  ]
+}

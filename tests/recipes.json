@@ -1,0 +1,10 @@
+[
+  {
+    "Name": "MigrationTests",
+    "Sources": [
+      "src/ModuleMigration.cs",
+      "tests/MigrationTests.cs",
+      "tests/Fixtures/BoosterSelection.cs"
+    ]
+  }
+]
